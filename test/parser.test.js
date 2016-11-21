@@ -39,6 +39,18 @@ describe('parser', function () {
             this.verify(prettyJson(result));
         });
 
+        it('should clean square brackets from type name', function () {
+            var result = parser.parseType('[number]');
+
+            this.verify(prettyJson(result));
+        });
+
+        it('should parse types correctly when they contain whitespace', function () {
+            var result = parser.parseType('[tuple  <string ; tuple <string; int>>]');
+
+            this.verify(prettyJson(result));
+        });
+
         it('should set a name when a value is prepended', function () {
             var result = parser.parseType('test:[tuple<string;tuple<string;int>>]');
 
@@ -49,11 +61,6 @@ describe('parser', function () {
 
     describe('parseSignature', function () {
         
-        it('should throw an error if signature contains no arrow', function () {
-            var message = 'Signature must contain an output declaration';
-            assert.throws(parser.parseSignature.bind(null, 'int'), message);
-        });
-
         it('should parse a correctly formatted signature', function () {
             var signature = 'name:string, definition:tuple<string;tuple<int;int>> => * => tuple<int;int>';
             var result = parser.parseSignature(signature);

@@ -3,18 +3,17 @@ var signetParser = (function () {
 
     function terminateSubtype(bracketStack, currentChar) {
         return (bracketStack.length === 1 && currentChar === ';')
-            || (currentChar === '>' && bracketStack.length === 0)
+            || (currentChar === '>' && bracketStack.length === 0);
     }
 
-    function charIn(chars, char) {
-        var pattern = RegExp('^[' + chars.join('\\') + ']$');
-        return char.match(pattern) !== null;
+    function isStructuralChar(char) {
+        return char.match(/[\<\;\s]/) !== null;
     }
 
     function captureChar(bracketStack, currentChar) {
-        return (bracketStack.length === 0 && currentChar === '>')
-            || (bracketStack.length > 0 && !charIn(['<', ';'], currentChar))
-            || bracketStack.length > 1;
+        return bracketStack.length > 1
+            || (bracketStack.length === 0 && currentChar === '>')
+            || (bracketStack.length > 0 && !isStructuralChar(currentChar));
     }
 
     function updateStack(bracketStack, currentChar) {
@@ -71,8 +70,8 @@ var signetParser = (function () {
         var rawType = typeStr.replace(typePattern, '$2');
 
         return {
-            name: typeName === typeStr ? null : typeName,
-            type: rawType.split('<')[0].replace('[', ''),
+            name: typeName === typeStr ? null : typeName.trim(),
+            type: rawType.split('<')[0].replace(/\[|\]/g, '').trim(),
             subtype: parseSubtype(rawType),
             optional: rawType.match(/^\[[^\]]+\]$/) !== null
         };
@@ -85,10 +84,6 @@ var signetParser = (function () {
     function parseSignature(signature) {
         var parameterTokens = signature.split(/\s*\=\>\s*/);
 
-        if (parameterTokens.length < 2) {
-            throw new Error('Signature must contain an output declaration');
-        }
-
         return parameterTokens.map(parseParams);
     }
 
@@ -98,4 +93,6 @@ var signetParser = (function () {
     };
 })();
 
-module.exports = signetParser;
+if(typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+    module.exports = signetParser;
+}
