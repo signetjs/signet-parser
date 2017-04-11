@@ -77,8 +77,25 @@ var signetParser = (function () {
         };
     }
 
+    function parseDependentMetadata (metadataStr) {
+        var tokens = metadataStr.trim().split(/\s+/g);
+
+        return {
+            operator: tokens[1],
+            left: tokens[0],
+            right: tokens[2]
+        }
+    }
+
     function parseParams (token){
-        return token.split(/\s*\,\s*/).map(parseType);
+        var tokenSet = token.split(/\s*\:\:\s*/);
+        var dependentMetadata = tokenSet.length > 1 ? tokenSet.shift() : null;
+
+        var typeValues = tokenSet[0].split(/\s*\,\s*/).map(parseType);
+
+        typeValues.dependent = dependentMetadata === null ? null : parseDependentMetadata(dependentMetadata);
+
+        return typeValues;
     }
 
     function parseSignature(signature) {

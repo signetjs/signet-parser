@@ -68,6 +68,20 @@ describe('parser', function () {
             this.verify(prettyJson(result));
         });
 
+        it('should parse type metadata correctly', function () {
+            var signature = 'A < B :: A:int, B:int => name:string, definition:tuple<string;tuple<int;int>> => * => tuple<int;int>'
+            var result = parser.parseSignature(signature);
+
+            this.verify(prettyJson(result) + '\n\n' +  prettyJson(result[0].dependent));
+        });
+
+        it('should parse type metadata correctly when no metadata exists', function () {
+            var signature = 'name:string, definition:tuple<string;tuple<int;int>> => * => tuple<int;int>'
+            var result = parser.parseSignature(signature);
+
+            this.verify(prettyJson(result) + '\n\n' +  prettyJson(result[0].dependent));
+        });
+
     });
 
 });
