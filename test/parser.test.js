@@ -57,6 +57,11 @@ describe('parser', function () {
             this.verify(prettyJson(result));
         });
 
+        it('should not break types which allow for colons', function () {
+            var result = parser.parseType('formattedString<:>');
+            this.verify(prettyJson(result));
+        });
+
     });
 
     describe('parseSignature', function () {

@@ -65,7 +65,7 @@ var signetParser = (function () {
     }
 
     function parseType(typeStr) {
-        var typePattern = /^([^\:]+)\:(.+)$/;
+        var typePattern = /^([^:<]+)\:(.+)$/;
         var typeName = typeStr.replace(typePattern, '$1');
         var rawType = typeStr.replace(typePattern, '$2');
 
@@ -90,7 +90,6 @@ var signetParser = (function () {
     function parseParams (token){
         var tokenSet = token.split(/\s*\:\:\s*/);
         var dependentMetadata = tokenSet.length > 1 ? tokenSet.shift() : null;
-
         var typeValues = tokenSet[0].split(/\s*\,\s*/).map(parseType);
 
         typeValues.dependent = dependentMetadata === null ? null : parseDependentMetadata(dependentMetadata);
