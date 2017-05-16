@@ -15,6 +15,10 @@ var signetParser = (function () {
     }
 
     function registerTypeLevelMacro (typeKey, macro) {
+        if(typeof typeLevelMacros[typeKey] !== undefined) {
+            throw new Error('Type-level macro "' + typeKey + '" is already registered.');
+        }
+        
         typeLevelMacros[typeKey] = macro;
     }
 
