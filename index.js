@@ -8,10 +8,10 @@ var signetParser = (function () {
     }
 
     function applyTypeLeveMacro(typeDef) {
-        var typeLeveMacro = typeLeveMacros[typeDef.type];
-        typeLeveMacro = typeof typeLevelMacro === 'undefined' ? identity : typeLevelMacro;
+        var typeLevelMacro = typeLevelMacros[typeDef.type];
+        typeLevelMacro = typeof typeLevelMacro === 'undefined' ? identity : typeLevelMacro;
 
-        return typeLeveMacro(typeDef);
+        return typeLevelMacro(typeDef);
     }
 
     function registerTypeLevelMacro (typeKey, macro) {
