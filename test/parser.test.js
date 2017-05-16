@@ -89,4 +89,15 @@ describe('parser', function () {
 
     });
 
+    describe('type level macros', function () {
+        
+        it('should properly convert testType to *', function () {
+            parser.registerTypeLevelMacro('testType', function () { return parser.parseType('*'); });
+            var result = parser.parseType('testType');
+
+            this.verify(prettyJson(result));
+        });
+
+    });
+
 });
