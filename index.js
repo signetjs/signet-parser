@@ -1,6 +1,23 @@
 var signetParser = (function () {
     'use strict';
 
+    var typeLevelMacros = {};
+
+    function identity (value) {
+        return value;
+    }
+
+    function applyTypeLeveMacro(typeDef) {
+        var typeLeveMacro = typeLeveMacros[typeDef.type];
+        typeLeveMacro = typeof typeLevelMacro === 'undefined' ? identity : typeLevelMacro;
+
+        return typeLeveMacro(typeDef);
+    }
+
+    function registerTypeLevelMacro (typeKey, macro) {
+        typeLevelMacros[typeKey] = macro;
+    }
+
     function terminateSubtype(bracketStack, currentChar) {
         return (bracketStack.length === 1 && currentChar === ';')
             || (currentChar === '>' && bracketStack.length === 0);
@@ -69,12 +86,14 @@ var signetParser = (function () {
         var typeName = typeStr.replace(typePattern, '$1');
         var rawType = typeStr.replace(typePattern, '$2');
 
-        return {
+        var typeDef = {
             name: typeName === typeStr ? null : typeName.trim(),
             type: rawType.split('<')[0].replace(/\[|\]/g, '').trim(),
             subtype: parseSubtype(rawType),
             optional: rawType.match(/^\[[^\]]+\]$/) !== null
         };
+
+        return applyTypeLeveMacro(typeDef);
     }
 
     function parseDependentMetadata (metadataStr) {
@@ -105,7 +124,8 @@ var signetParser = (function () {
 
     return {
         parseSignature: parseSignature,
-        parseType: parseType
+        parseType: parseType,
+        registerTypeLevelMacro: registerTypeLevelMacro
     };
 })();
 
