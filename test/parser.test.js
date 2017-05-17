@@ -1,6 +1,6 @@
 var assert = require('chai').assert;
 var approvals = require('./utils/approvals.config');
-var parser = require('../index');
+var parser = require('../index')();
 
 function prettyJson(obj) {
     return JSON.stringify(obj, null, 4);
@@ -92,7 +92,11 @@ describe('parser', function () {
     describe('type level macros', function () {
         
         it('should properly convert testType to *', function () {
-            parser.registerTypeLevelMacro('testType', function () { return parser.parseType('*'); });
+            function testTypeMacro (typeStr) {
+                return typeStr === 'testType' ? '*' : typeStr;
+            }
+
+            parser.registerTypeLevelMacro(testTypeMacro);
             var result = parser.parseType('testType');
 
             this.verify(prettyJson(result));

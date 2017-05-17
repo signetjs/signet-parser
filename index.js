@@ -1,25 +1,32 @@
 function signetParser() {
     'use strict';
 
-    var typeLevelMacros = {};
+    var typeLevelMacros = [];
 
-    function identity (value) {
+    function identity(value) {
         return value;
     }
 
-    function applyTypeLeveMacro(typeDef) {
-        var typeLevelMacro = typeLevelMacros[typeDef.type];
-        typeLevelMacro = typeof typeLevelMacro === 'undefined' ? identity : typeLevelMacro;
-
-        return typeLevelMacro(typeDef);
+    function throwOnBadMacroResult(result) {
+        if (typeof result !== 'string') {
+            throw new Error('Macro Error: All macros must return a string; got ' + result + ' of type ' + typeof result);
+        }
     }
 
-    function registerTypeLevelMacro (typeKey, macro) {
-        if(typeof typeLevelMacros[typeKey] !== 'undefined') {
-            throw new Error('Type-level macro "' + typeKey + '" is already registered.');
+    function applyTypeLeveMacros(typeStr) {
+        var result = typeStr;
+        var macroLength = typeLevelMacros.length;
+
+        for (var i = 0; i < macroLength; i++) {
+            result = typeLevelMacros[i](result);
+            throwOnBadMacroResult(result);
         }
-        
-        typeLevelMacros[typeKey] = macro;
+
+        return result;
+    }
+
+    function registerTypeLevelMacro(macro) {
+        typeLevelMacros.push(macro);
     }
 
     function terminateSubtype(bracketStack, currentChar) {
@@ -86,21 +93,21 @@ function signetParser() {
     }
 
     function parseType(typeStr) {
-        var typePattern = /^([^:<]+)\:(.+)$/;
-        var typeName = typeStr.replace(typePattern, '$1');
-        var rawType = typeStr.replace(typePattern, '$2');
+        var transformedTypeStr = applyTypeLeveMacros(typeStr);
 
-        var typeDef = {
-            name: typeName === typeStr ? null : typeName.trim(),
+        var typePattern = /^([^:<]+)\:(.+)$/;
+        var typeName = transformedTypeStr.replace(typePattern, '$1');
+        var rawType = transformedTypeStr.replace(typePattern, '$2');
+
+        return {
+            name: typeName === transformedTypeStr ? null : typeName.trim(),
             type: rawType.split('<')[0].replace(/\[|\]/g, '').trim(),
             subtype: parseSubtype(rawType),
             optional: rawType.match(/^\[[^\]]+\]$/) !== null
         };
-
-        return applyTypeLeveMacro(typeDef);
     }
 
-    function parseDependentMetadata (metadataStr) {
+    function parseDependentMetadata(metadataStr) {
         var tokens = metadataStr.trim().split(/\s+/g);
 
         return {
@@ -110,7 +117,7 @@ function signetParser() {
         }
     }
 
-    function parseParams (token){
+    function parseParams(token) {
         var tokenSet = token.split(/\s*\:\:\s*/);
         var dependentMetadata = tokenSet.length > 1 ? tokenSet.shift() : null;
         var typeValues = tokenSet[0].split(/\s*\,\s*/).map(parseType);
@@ -133,6 +140,6 @@ function signetParser() {
     };
 }
 
-if(typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports = signetParser;
 }
