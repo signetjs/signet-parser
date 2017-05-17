@@ -1,4 +1,4 @@
-var signetParser = (function () {
+function signetParser() {
     'use strict';
 
     var typeLevelMacros = {};
@@ -131,7 +131,7 @@ var signetParser = (function () {
         parseType: parseType,
         registerTypeLevelMacro: registerTypeLevelMacro
     };
-})();
+}
 
 if(typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports = signetParser;
