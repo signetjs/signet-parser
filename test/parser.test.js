@@ -51,6 +51,12 @@ describe('parser', function () {
             this.verify(prettyJson(result));
         });
 
+        it('should parse types with escaped special characters', function () {
+            var result = parser.parseType('[formattedStr<%;%<%>%%>]');
+
+            this.verify(prettyJson(result));
+        });
+
         it('should set a name when a value is prepended', function () {
             var result = parser.parseType('test:[tuple<string;tuple<string;int>>]');
 

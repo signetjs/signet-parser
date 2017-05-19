@@ -28,7 +28,7 @@ BeyondCompare.prototype = {
 };
 
 var approvalsConfig = {
-  reporters:  [ new BeyondCompare() ],
+  reporters:  ['kdiff3'],
   normalizeLineEndingsTo: '\n', // default
   appendEOL: true,
   EOL:  require('os').EOL,
