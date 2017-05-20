@@ -11,6 +11,12 @@
             "type": "int",
             "subtype": [],
             "optional": false
+        },
+        {
+            "name": "C",
+            "type": "int",
+            "subtype": [],
+            "optional": false
         }
     ],
     [
@@ -51,8 +57,15 @@
     ]
 ]
 
-{
-    "operator": "<",
-    "left": "A",
-    "right": "B"
-}
+[
+    {
+        "operator": "<",
+        "left": "A",
+        "right": "B"
+    },
+    {
+        "operator": "<",
+        "left": "B",
+        "right": "C"
+    }
+]

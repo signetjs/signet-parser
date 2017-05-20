@@ -117,7 +117,7 @@ function signetParser() {
         };
     }
 
-    function parseDependentMetadata(metadataStr) {
+    function parseDependentMetadataToken(metadataStr) {
         var tokens = metadataStr.trim().split(/\s+/g);
 
         return {
@@ -125,6 +125,10 @@ function signetParser() {
             left: tokens[0],
             right: tokens[2]
         }
+    }
+
+    function parseDependentMetadata (metadataStr) {
+        return metadataStr.split(/\,\s*/g).map(parseDependentMetadataToken);
     }
 
     function parseParams(token) {

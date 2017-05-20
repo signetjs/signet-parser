@@ -80,7 +80,7 @@ describe('parser', function () {
         });
 
         it('should parse type metadata correctly', function () {
-            var signature = 'A < B :: A:int, B:int => name:string, definition:tuple<string;tuple<int;int>> => * => tuple<int;int>'
+            var signature = 'A < B, B < C :: A:int, B:int, C:int => name:string, definition:tuple<string;tuple<int;int>> => * => tuple<int;int>'
             var result = parser.parseSignature(signature);
 
             this.verify(prettyJson(result) + '\n\n' +  prettyJson(result[0].dependent));
