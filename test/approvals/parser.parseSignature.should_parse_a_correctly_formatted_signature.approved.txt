@@ -11,7 +11,7 @@
             "type": "tuple",
             "subtype": [
                 "string",
-                "tuple<int;int>"
+                "tuple<int,int>"
             ],
             "optional": false
         }

@@ -29,13 +29,17 @@ function signetParser() {
         typeLevelMacros.push(macro);
     }
 
+    function isDelimiter (symbol) {
+        return symbol === ';' || symbol === ',';
+    }
+
     function terminateSubtype(bracketStack, currentChar) {
-        return (bracketStack.length === 1 && currentChar === ';')
+        return (bracketStack.length === 1 && isDelimiter(currentChar))
             || (currentChar === '>' && bracketStack.length === 0);
     }
 
     function isStructuralChar(char) {
-        return char.match(/[\<\;\s]/) !== null;
+        return char.match(/[\<\;\s\,]/) !== null;
     }
 
     function captureChar(bracketStack, currentChar) {
@@ -131,20 +135,91 @@ function signetParser() {
         return metadataStr.split(/\,\s*/g).map(parseDependentMetadataToken);
     }
 
+    function isComma(symbol) {
+        return symbol === ',';
+    }
+
+    function isDoubleColon(symbol) {
+        return symbol === '::';
+    }
+
     function parseParams(token) {
-        var tokenSet = token.split(/\s*\:\:\s*/);
+        var tokenSet = splitOnSymbol(isDoubleColon, token);
         var dependentMetadata = tokenSet.length > 1 ? tokenSet.shift() : null;
-        var typeValues = tokenSet[0].split(/\s*\,\s*/).map(parseType);
+        var typeValues = splitOnSymbol(isComma, tokenSet[0]).map(parseType);
 
         typeValues.dependent = dependentMetadata === null ? null : parseDependentMetadata(dependentMetadata);
 
         return typeValues;
     }
 
-    function parseSignature(signature) {
-        var parameterTokens = signature.split(/\s*\=\>\s*/);
+    function bracketStackFactory () {
+        var stack = [];
 
-        return parameterTokens.map(parseParams);
+        function update(symbol) {
+            if(symbol === '<') {
+                stack.push('<');
+            }
+            if(symbol === '>') {
+                stack.pop();
+            }
+            if(symbol === '::') {
+                stack.length = 0;
+            }
+        }
+
+        return {
+            update: update,
+            get length () {
+                return stack.length;
+            }
+        };
+    }
+
+    function isSequenceChar (symbol) {
+        return symbol === '=' || 
+            symbol === '%' || 
+            symbol === ':';
+    }
+
+    function splitOnSymbol(isSplitSymbol, signature) {
+        var tokens = [];
+        var currentToken = '';
+        var currentSymbol = '';
+        var bracketStack = bracketStackFactory();
+
+        for(var i = 0; i < signature.length; i++){
+            currentSymbol = signature[i];
+
+            if(isSequenceChar(currentSymbol)) {
+                i++;
+                currentSymbol = currentSymbol + signature[i];
+            }
+
+            bracketStack.update(currentSymbol);
+
+            if(isSplitSymbol(currentSymbol) && bracketStack.length === 0) {
+                tokens.push(currentToken);
+                currentToken = '';
+                continue;
+            }
+
+            currentToken += currentSymbol;
+        }
+
+        if(currentToken !== '') {
+            tokens.push(currentToken);
+        }
+
+        return tokens;
+    }
+
+    function isArrow(symbol) {
+        return symbol === '=>';
+    }
+
+    function parseSignature(signature) {
+        return splitOnSymbol(isArrow, signature).map(parseParams);
     }
 
     return {

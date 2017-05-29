@@ -73,7 +73,7 @@ describe('parser', function () {
     describe('parseSignature', function () {
         
         it('should parse a correctly formatted signature', function () {
-            var signature = 'name:string, definition:tuple<string;tuple<int;int>> => * => tuple<int;int>';
+            var signature = 'name:string, definition:tuple<string,tuple<int,int>> => * => tuple<int;int>';
             var result = parser.parseSignature(signature);
 
             this.verify(prettyJson(result));
