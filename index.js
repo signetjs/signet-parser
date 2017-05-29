@@ -92,8 +92,9 @@ function signetParser() {
             var currentChar = typeStringTokens[i];
 
             if(currentChar === '%') {
+                subtypeStr += bracketStack.length > 1 ? '%' : '';
+                subtypeStr += typeStringTokens[i + 1];
                 i++;
-                subtypeStr += typeStringTokens[i];
                 continue;
             }
 

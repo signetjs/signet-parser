@@ -68,6 +68,11 @@ describe('parser', function () {
             this.verify(prettyJson(result));
         });
 
+        it('should properly parse nested types with delimiters', function () {
+            var result = parser.parseType('tuple<int; formattedString<^\\d+(\\%;)?\\D*$>; boolean>');
+            this.verify(prettyJson(result));
+        });
+
     });
 
     describe('parseSignature', function () {
