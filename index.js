@@ -182,6 +182,12 @@ function signetParser() {
             symbol === ':';
     }
 
+    function isSpecialSquence (symbol) {
+        return symbol[0] === '%' ||
+            symbol === '=>' ||
+            symbol === '::';
+    }
+
     function splitOnSymbol(isSplitSymbol, signature) {
         var tokens = [];
         var currentToken = '';
@@ -191,7 +197,7 @@ function signetParser() {
         for(var i = 0; i < signature.length; i++){
             currentSymbol = signature[i];
 
-            if(isSequenceChar(currentSymbol)) {
+            if(isSequenceChar(currentSymbol) && isSpecialSquence(currentSymbol + signature[i + 1])) {
                 i++;
                 currentSymbol = currentSymbol + signature[i];
             }
