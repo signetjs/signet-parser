@@ -93,6 +93,13 @@ describe('parser', function () {
             this.verify(prettyJson(result) + '\n\n' +  prettyJson(result[0].dependent));
         });
 
+        it('should parse a tree with named types throughout', function () {
+            var signature = 'signature:string, functionToEnforce:function, options:[object] => function';
+            result = parser.parseSignature(signature);
+
+            this.verify(prettyJson(result));
+        });
+
     });
 
     describe('type level macros', function () {

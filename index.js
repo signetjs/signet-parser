@@ -117,7 +117,7 @@ function signetParser() {
             name: typeName === transformedTypeStr ? null : typeName.trim(),
             type: rawType.split('<')[0].replace(/\[|\]/g, '').trim(),
             subtype: parseSubtype(rawType),
-            optional: rawType.match(/^\[[^\]]+\]$/) !== null
+            optional: rawType.trim().match(/^\[[^\]]+\]$/) !== null
         };
     }
 
