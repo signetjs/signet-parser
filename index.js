@@ -2,6 +2,7 @@ function signetParser() {
     'use strict';
 
     var typeLevelMacros = [];
+    var signatureLevelMacros = [];
 
     function identity(value) {
         return value;
@@ -13,12 +14,12 @@ function signetParser() {
         }
     }
 
-    function applyTypeLeveMacros(typeStr) {
+    function applyMacros(macroSet, typeStr) {
         var result = typeStr;
-        var macroLength = typeLevelMacros.length;
+        var macroLength = macroSet.length;
 
         for (var i = 0; i < macroLength; i++) {
-            result = typeLevelMacros[i](result);
+            result = macroSet[i](result);
             throwOnBadMacroResult(result);
         }
 
@@ -27,6 +28,10 @@ function signetParser() {
 
     function registerTypeLevelMacro(macro) {
         typeLevelMacros.push(macro);
+    }
+
+    function registerSignatureLevelMacro(macro) {
+        signatureLevelMacros.push(macro);
     }
 
     function isDelimiter (symbol) {
@@ -108,7 +113,7 @@ function signetParser() {
     }
 
     function parseType(typeStr) {
-        var transformedTypeStr = applyTypeLeveMacros(typeStr);
+        var transformedTypeStr = applyMacros(typeLevelMacros, typeStr);
 
         var typePattern = /^([^:<]+)\:(.+)$/;
         var typeName = transformedTypeStr.replace(typePattern, '$1');
@@ -226,7 +231,8 @@ function signetParser() {
     }
 
     function parseSignature(signature) {
-        return splitOnSymbol(isArrow, signature).map(parseParams);
+        var resolvedSignature = applyMacros(signatureLevelMacros, signature);
+        return splitOnSymbol(isArrow, resolvedSignature).map(parseParams);
     }
 
     return {
