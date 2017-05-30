@@ -93,7 +93,6 @@ function signetParser() {
     }
 
     function parseSubtype(typeStr) {
-        console.log(typeStr);
         var optionalPattern = /^\[(.*)\]$/
         var subtypeData = getSubtypeData(typeStr.trim().replace(optionalPattern, '$1'));
         return splitOnSymbol(isSubtypeSeparator, subtypeData)
