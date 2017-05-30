@@ -73,6 +73,11 @@ describe('parser', function () {
             this.verify(prettyJson(result));
         });
 
+        it('should properly parse a signature with a function with declared contract', function () {
+            var result = parser.parseType('function<* => boolean>');
+            this.verify(prettyJson(result));
+        });
+
     });
 
     describe('parseSignature', function () {

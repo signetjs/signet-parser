@@ -34,7 +34,7 @@ function signetParser() {
         signatureLevelMacros.push(macro);
     }
 
-    function isDelimiter (symbol) {
+    function isDelimiter(symbol) {
         return symbol === ';' || symbol === ',';
     }
 
@@ -83,33 +83,21 @@ function signetParser() {
         }
     }
 
+    function getSubtypeData(typeStr) {
+        var subtypeToken = typeStr.trim().split('<').slice(1).join('<');
+        return subtypeToken.substring(0, subtypeToken.length - 1);
+    }
+
+    function isSubtypeSeparator(value) {
+        return value === ';' || value === ',';
+    }
+
     function parseSubtype(typeStr) {
-        var subtypeStr = '';
-        var subtypeInfo = [];
-        var bracketStack = [];
-
-        var getSubtypeStr = getUpdatedSubtypeStr(bracketStack, buildAppender(bracketStack));
-        var updateSubtypes = updateSubtypeInfo(bracketStack, subtypeInfo);
-
-        var typeStringTokens = typeStr.split('');
-
-        for(var i = 0; i < typeStringTokens.length; i++) {
-            var currentChar = typeStringTokens[i];
-
-            if(currentChar === '%') {
-                subtypeStr += bracketStack.length > 1 ? '%' : '';
-                subtypeStr += typeStringTokens[i + 1];
-                i++;
-                continue;
-            }
-
-            updateStack(bracketStack, currentChar);
-            updateSubtypes(subtypeStr, currentChar);
-
-            subtypeStr = getSubtypeStr(subtypeStr, currentChar);
-        }
-
-        return subtypeInfo;
+        console.log(typeStr);
+        var optionalPattern = /^\[(.*)\]$/
+        var subtypeData = getSubtypeData(typeStr.trim().replace(optionalPattern, '$1'));
+        return splitOnSymbol(isSubtypeSeparator, subtypeData)
+            .map(function (value) { return value.trim(); });
     }
 
     function parseType(typeStr) {
@@ -137,7 +125,7 @@ function signetParser() {
         }
     }
 
-    function parseDependentMetadata (metadataStr) {
+    function parseDependentMetadata(metadataStr) {
         return metadataStr.split(/\,\s*/g).map(parseDependentMetadataToken);
     }
 
@@ -159,36 +147,36 @@ function signetParser() {
         return typeValues;
     }
 
-    function bracketStackFactory () {
+    function bracketStackFactory() {
         var stack = [];
 
         function update(symbol) {
-            if(symbol === '<') {
+            if (symbol === '<') {
                 stack.push('<');
             }
-            if(symbol === '>') {
+            if (symbol === '>') {
                 stack.pop();
             }
-            if(symbol === '::') {
+            if (symbol === '::') {
                 stack.length = 0;
             }
         }
 
         return {
             update: update,
-            get length () {
+            get length() {
                 return stack.length;
             }
         };
     }
 
-    function isSequenceChar (symbol) {
-        return symbol === '=' || 
-            symbol === '%' || 
+    function isSequenceChar(symbol) {
+        return symbol === '=' ||
+            symbol === '%' ||
             symbol === ':';
     }
 
-    function isSpecialSquence (symbol) {
+    function isSpecialSquence(symbol) {
         return symbol[0] === '%' ||
             symbol === '=>' ||
             symbol === '::';
@@ -200,17 +188,23 @@ function signetParser() {
         var currentSymbol = '';
         var bracketStack = bracketStackFactory();
 
-        for(var i = 0; i < signature.length; i++){
+        for (var i = 0; i < signature.length; i++) {
             currentSymbol = signature[i];
 
-            if(isSequenceChar(currentSymbol) && isSpecialSquence(currentSymbol + signature[i + 1])) {
+            if (bracketStack.length === 0 && currentSymbol === '%') {
+                i++;
+                currentToken += signature[i];
+                continue;
+            }
+            
+            if (isSequenceChar(currentSymbol) && isSpecialSquence(currentSymbol + signature[i + 1])) {
                 i++;
                 currentSymbol = currentSymbol + signature[i];
             }
 
             bracketStack.update(currentSymbol);
 
-            if(isSplitSymbol(currentSymbol) && bracketStack.length === 0) {
+            if (isSplitSymbol(currentSymbol) && bracketStack.length === 0) {
                 tokens.push(currentToken);
                 currentToken = '';
                 continue;
@@ -219,7 +213,7 @@ function signetParser() {
             currentToken += currentSymbol;
         }
 
-        if(currentToken !== '') {
+        if (currentToken !== '') {
             tokens.push(currentToken);
         }
 
