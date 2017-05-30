@@ -238,6 +238,7 @@ function signetParser() {
     return {
         parseSignature: parseSignature,
         parseType: parseType,
+        registerSignatureLevelMacro: registerSignatureLevelMacro,
         registerTypeLevelMacro: registerTypeLevelMacro
     };
 }
