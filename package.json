@@ -1,6 +1,6 @@
 {
   "name": "signet-parser",
-  "version": "5.2.3",
+  "version": "5.2.4",
   "description": "Type parser for Signet type system",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
   "devDependencies": {
     "approvals": "^2.1.2",
     "chai": "^3.5.0",
+    "eslint": "^3.19.0",
     "mocha": "^3.1.2"
   }
 }
