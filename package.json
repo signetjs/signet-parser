@@ -1,6 +1,6 @@
 {
   "name": "signet-parser",
-  "version": "5.2.4",
+  "version": "5.3.0",
   "description": "Type parser for Signet type system",
   "main": "index.js",
   "scripts": {

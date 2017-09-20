@@ -9,7 +9,7 @@ var approvalsConfig = {
   normalizeLineEndingsTo: '\n', // default
   appendEOL: true,
   EOL:  require('os').EOL,
-  errorOnStaleApprovedFiles: true,
+  errorOnStaleApprovedFiles: false,
   stripBOM: false
 };
 
