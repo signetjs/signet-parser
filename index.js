@@ -63,19 +63,36 @@ function signetParser() {
         };
     }
 
+    function isObjectInstance(value) {
+        return typeof value === 'object' && value !== null;
+    }
+
     function isArray (value) {
-        return typeof value === 'object' 
-            && value !== null 
+        return isObjectInstance(value) 
             && Object.prototype.toString.call(value) === '[object Array]';
     }
 
     function copyArray (values) {
         var result = [];
         for(var i = 0; i < values.length; i++) {
-            result.push(values[i]);
+            result.push(copyObjectOrReturn(values[i]));
         }
 
+        result.dependent = isArray(values.dependent)
+            ? copyArray(values.dependent)
+            : values.dependent;
+
         return result;
+    }
+
+    function copyObjectOrReturn (value) {
+        if(isArray(value)) {
+            return copyArray(value);
+        } else if (isObjectInstance(value)) {
+            return copyProps(value);
+        } else {
+            return value;
+        }
     }
 
     function copyProps(obj) {
@@ -86,7 +103,7 @@ function signetParser() {
             var key = keys[i];
             var value = obj[key];
             
-            result[key] = isArray(value) ? copyArray(value) : value;
+            result[key] = copyObjectOrReturn(value);
         }
 
         return result;
@@ -96,13 +113,14 @@ function signetParser() {
         var memoizedTypes = {};
 
         return function (typeStr) {
-            if(typeof memoizedTypes[typeStr] === 'object') {
-                return copyProps(memoizedTypes[typeStr]);
-            } else {
-                var parsedType = parser(typeStr);
+            var parsedType = memoizedTypes[typeStr];
+
+            if(typeof parsedType === 'undefined') {
+                parsedType = parser(typeStr);
                 memoizedTypes[typeStr] = parsedType;
-                return copyProps(parsedType);
             }
+
+            return isArray(parsedType) ? copyArray(parsedType) : copyProps(parsedType);
         }
     }
 
@@ -217,10 +235,12 @@ function signetParser() {
         return symbol === '=>';
     }
 
-    function parseSignature(signature) {
+    function signatureParser(signature) {
         var resolvedSignature = applyMacros(signatureLevelMacros, signature);
         return splitOnSymbol(isArrow, resolvedSignature).map(parseParams);
     }
+
+    var parseSignature = copyMemoizerFactory(signatureParser);
 
     return {
         parseSignature: parseSignature,
