@@ -1,8 +1,8 @@
 {
+    "name": null,
     "type": "formattedString",
     "subtype": [
         ":"
     ],
-    "optional": false,
-    "name": null
+    "optional": false
 }

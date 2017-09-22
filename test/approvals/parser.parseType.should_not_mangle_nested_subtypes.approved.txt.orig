@@ -1,8 +1,8 @@
 {
+    "name": null,
     "type": "array",
     "subtype": [
         "tuple<int>"
     ],
-    "optional": false,
-    "name": null
+    "optional": false
 }

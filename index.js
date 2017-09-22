@@ -46,20 +46,27 @@ function signetParser() {
             .map(function (value) { return value.trim(); });
     }
 
+    function getColonPosition(typeStr) {
+        var colonPosition = -1;
+        var lastChar = '';
 
+        for (var i = 0; i < typeStr.length && lastChar !== '<' && colonPosition === -1; i++) {
+            lastChar = typeStr[i];
+            if (lastChar === ':') {
+                colonPosition = i;
+            }
+        }
+
+        return colonPosition;
+    }
 
     function typeParser(typeStr) {
         var transformedTypeStr = applyMacros(typeLevelMacros, typeStr);
 
-        var typePattern = /^([^:<]+)\:(.+)$/;
-        var typeName = transformedTypeStr.replace(typePattern, '$1');
-        var rawType = transformedTypeStr.replace(typePattern, '$2');
-
         return {
-            name: typeName === transformedTypeStr ? null : typeName.trim(),
-            type: rawType.split('<')[0].replace(/\[|\]/g, '').trim(),
-            subtype: parseSubtype(rawType),
-            optional: rawType.trim().match(/^\[[^\]]+\]$/) !== null
+            type: transformedTypeStr.split('<')[0].replace(/\[|\]/g, '').trim(),
+            subtype: parseSubtype(transformedTypeStr),
+            optional: transformedTypeStr.trim().match(/^\[[^\]]+\]$/) !== null
         };
     }
 
@@ -67,14 +74,14 @@ function signetParser() {
         return typeof value === 'object' && value !== null;
     }
 
-    function isArray (value) {
-        return isObjectInstance(value) 
+    function isArray(value) {
+        return isObjectInstance(value)
             && Object.prototype.toString.call(value) === '[object Array]';
     }
 
-    function copyArray (values) {
+    function copyArray(values) {
         var result = [];
-        for(var i = 0; i < values.length; i++) {
+        for (var i = 0; i < values.length; i++) {
             result.push(copyObjectOrReturn(values[i]));
         }
 
@@ -85,8 +92,8 @@ function signetParser() {
         return result;
     }
 
-    function copyObjectOrReturn (value) {
-        if(isArray(value)) {
+    function copyObjectOrReturn(value) {
+        if (isArray(value)) {
             return copyArray(value);
         } else if (isObjectInstance(value)) {
             return copyProps(value);
@@ -99,23 +106,23 @@ function signetParser() {
         var keys = Object.keys(obj);
         var result = {};
 
-        for(var i = 0; i < keys.length; i++) {
+        for (var i = 0; i < keys.length; i++) {
             var key = keys[i];
             var value = obj[key];
-            
+
             result[key] = copyObjectOrReturn(value);
         }
 
         return result;
     }
 
-    function copyMemoizerFactory (parser) {
+    function copyMemoizerFactory(parser) {
         var memoizedTypes = {};
 
         return function (typeStr) {
             var parsedType = memoizedTypes[typeStr];
 
-            if(typeof parsedType === 'undefined') {
+            if (typeof parsedType === 'undefined') {
                 parsedType = parser(typeStr);
                 memoizedTypes[typeStr] = parsedType;
             }
@@ -124,7 +131,20 @@ function signetParser() {
         }
     }
 
-    var parseType = copyMemoizerFactory(typeParser);
+    var memoizedTypeParser = copyMemoizerFactory(typeParser);
+
+    function parseType(typeStr) {
+        var colonPosition = typeStr.indexOf(':') > -1 ? getColonPosition(typeStr) : -1;
+
+        var typeName = colonPosition === -1 ? null : typeStr.substring(0, colonPosition).trim();
+        var rawType = typeStr.substring(colonPosition + 1);
+
+        var parsedType = memoizedTypeParser(rawType);
+
+        parsedType.name = typeName;
+
+        return parsedType;
+    }
 
     function parseDependentMetadataToken(metadataStr) {
         var tokens = metadataStr.trim().split(/\s+/g);
@@ -207,7 +227,7 @@ function signetParser() {
                 currentToken += signature[i];
                 continue;
             }
-            
+
             if (isSequenceChar(currentSymbol) && isSpecialSquence(currentSymbol + signature[i + 1])) {
                 i++;
                 currentSymbol = currentSymbol + signature[i];

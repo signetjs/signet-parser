@@ -1,6 +1,6 @@
 {
+    "name": null,
     "type": "number",
     "subtype": [],
-    "optional": true,
-    "name": null
+    "optional": true
 }
